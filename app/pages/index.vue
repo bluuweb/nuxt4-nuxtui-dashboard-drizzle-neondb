@@ -2,6 +2,12 @@
 
 <template>
   <div>
-    <h1>Home Page</h1>
+    <h1>
+      Home Page
+      <UIcon
+        name="i-lucide-house"
+        class="size-5"
+      />
+    </h1>
   </div>
 </template>
