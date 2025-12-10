@@ -32,6 +32,8 @@ async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
       description: "Your profile has been updated successfully.",
       color: "success",
     });
+
+    await refreshNuxtData("user-profile");
   } catch (error) {
     const err = error as NuxtError;
     toast.add({
@@ -103,6 +105,9 @@ async function confirmReplace() {
         description: "Your avatar has been updated successfully.",
         color: "success",
       });
+
+      // Sirve para actualizar el menú de usuario también
+      await refreshNuxtData("user-profile");
     } else {
       toast.add({
         title: "Error",

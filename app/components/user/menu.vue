@@ -9,15 +9,17 @@ const colorMode = useColorMode();
 
 const { clear } = useUserSession();
 
-const { data: userDB } = await useFetch("/api/user/profile");
+const { data: userDB } = await useFetch("/api/user/profile", {
+  key: "user-profile",
+});
 
-const user = ref({
+const user = computed(() => ({
   name: userDB.value?.username || "",
   avatar: {
     src: userDB.value?.avatarUrl || "",
     alt: userDB.value?.name || "",
   },
-});
+}));
 
 const items = computed<DropdownMenuItem[][]>(() => [
   [
