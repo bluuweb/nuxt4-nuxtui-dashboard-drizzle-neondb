@@ -32,7 +32,6 @@ async function onSubmit(payload: FormSubmitEvent<LoginTypeZodSchema>) {
       method: "POST",
       body: payload.data,
     });
-    await fetch();
     await navigateTo("/dashboard");
     toast.add({
       title: "Login Successful",
