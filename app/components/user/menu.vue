@@ -9,11 +9,13 @@ const colorMode = useColorMode();
 
 const { clear } = useUserSession();
 
+const { data: userDB } = await useFetch("/api/user/profile");
+
 const user = ref({
-  name: "Benjamin Canac",
+  name: userDB.value?.username || "",
   avatar: {
-    src: "https://github.com/benjamincanac.png",
-    alt: "Benjamin Canac",
+    src: userDB.value?.avatarUrl || "",
+    alt: userDB.value?.name || "",
   },
 });
 

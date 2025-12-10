@@ -1,19 +1,13 @@
+import { registerZodSchema } from "#shared/zod/register.schema";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 import { db } from "~~/server/database";
 import type { InsertUser } from "~~/server/database/schema";
 import { usersTable } from "~~/server/database/schema";
 
-const bodySchema = z.object({
-  email: z.email().trim().toLowerCase(),
-  password: z.string().min(6),
-  name: z.string().min(2).max(100).trim(),
-});
-
 export default eventHandler(async (event) => {
-  const { email, password, name } = await readValidatedBody(
+  const { email, password, username } = await readValidatedBody(
     event,
-    bodySchema.parse
+    registerZodSchema.parse
   );
 
   // buscar si el usuario ya existe en la base de datos
@@ -29,13 +23,26 @@ export default eventHandler(async (event) => {
     });
   }
 
+  // Buscando si el nombre de usuario ya existe en la base de datos
+  const [existingUsername] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.username, username));
+
+  if (existingUsername) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Username is already taken",
+    });
+  }
+
   // hash de la contraseña
   const hashedPassword = await hashPassword(password);
 
   // insertar el nuevo usuario en la base de datos
   const newUser: InsertUser = {
     email,
-    name,
+    username,
     password: hashedPassword,
   };
 

@@ -1,35 +1,46 @@
 <script setup lang="ts">
+import type { NuxtError } from "#app";
+import type { ProfileTypeZodSchema as ProfileSchema } from "#shared/zod/profile.schema";
+import { profileZodSchema as profileSchema } from "#shared/zod/profile.schema";
 import type { FormSubmitEvent } from "@nuxt/ui";
-import * as z from "zod";
 
 const fileRef = ref<HTMLInputElement>();
 
-const profileSchema = z.object({
-  name: z.string().min(2, "Too short"),
-  email: z.string().email("Invalid email"),
-  username: z.string().min(2, "Too short"),
-  avatar: z.string().optional(),
-  bio: z.string().optional(),
-});
+const { data: user } = await useFetch("/api/user/profile");
 
-type ProfileSchema = z.output<typeof profileSchema>;
+const showPreviewModal = ref(false);
+const selectedFile = ref<File | null>(null);
+const previewUrl = ref<string | null>(null);
+const uploading = ref(false);
 
 const profile = reactive<Partial<ProfileSchema>>({
-  name: "Benjamin Canac",
-  email: "ben@nuxtlabs.com",
-  username: "benjamincanac",
-  avatar: undefined,
-  bio: undefined,
+  name: user.value?.name || "",
+  email: user.value?.email || "",
+  username: user.value?.username || "",
+  avatar: user.value?.avatarUrl || "",
+  bio: user.value?.bio || "",
 });
 const toast = useToast();
 async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
-  toast.add({
-    title: "Success",
-    description: "Your settings have been updated.",
-    icon: "i-lucide-check",
-    color: "success",
-  });
-  console.log(event.data);
+  try {
+    await $fetch("/api/user/profile", {
+      method: "PATCH",
+      body: event.data,
+    });
+    toast.add({
+      title: "Profile Updated",
+      description: "Your profile has been updated successfully.",
+      color: "success",
+    });
+  } catch (error) {
+    const err = error as NuxtError;
+    toast.add({
+      title: "Profile Update Error",
+      description:
+        err.statusMessage || "An error occurred during profile update.",
+      color: "error",
+    });
+  }
 }
 
 function onFileChange(e: Event) {
@@ -40,6 +51,91 @@ function onFileChange(e: Event) {
   }
 
   profile.avatar = URL.createObjectURL(input.files[0]!);
+
+  const file = input.files[0]!;
+  // validación básica cliente
+  const MAX_BYTES = 2 * 1024 * 1024; // 2 MB (ajusta)
+  const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+  if (!allowed.includes(file.type)) {
+    toast.add({
+      title: "Error",
+      description: "Tipo de imagen no permitido",
+      color: "error",
+    });
+    input.value = "";
+    return;
+  }
+
+  if (file.size > MAX_BYTES) {
+    toast.add({
+      title: "Error",
+      description: "Imagen demasiado grande",
+      color: "error",
+    });
+    input.value = "";
+    return;
+  }
+
+  selectedFile.value = file;
+  previewUrl.value = URL.createObjectURL(file);
+  showPreviewModal.value = true;
+}
+
+async function confirmReplace() {
+  if (!selectedFile.value) return;
+
+  uploading.value = true;
+
+  try {
+    const fd = new FormData();
+    fd.append("file", selectedFile.value);
+
+    const res = await $fetch("/api/user/avatar", {
+      method: "PUT",
+      body: fd,
+    });
+
+    if (res?.url) {
+      profile.avatar = res.url;
+      toast.add({
+        title: "Avatar Updated",
+        description: "Your avatar has been updated successfully.",
+        color: "success",
+      });
+    } else {
+      toast.add({
+        title: "Error",
+        description: "No se recibió URL del servidor",
+        color: "error",
+      });
+    }
+  } catch (error) {
+    const err = error as NuxtError;
+    toast.add({
+      title: "Upload Failed",
+      description:
+        err?.statusMessage ||
+        err?.message ||
+        "An error occurred during upload.",
+      color: "error",
+    });
+  } finally {
+    // limpiar estado
+    if (previewUrl.value) {
+      URL.revokeObjectURL(previewUrl.value);
+    }
+    selectedFile.value = null;
+    previewUrl.value = null;
+    uploading.value = false;
+  }
+}
+
+function cancelReplace() {
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+  selectedFile.value = null;
+  previewUrl.value = null;
+  if (fileRef.value) fileRef.value.value = "";
 }
 
 function onFileClick() {
@@ -54,6 +150,15 @@ function onFileClick() {
     :state="profile"
     @submit="onSubmit"
   >
+    <AvatarConfirmModal
+      v-model:open="showPreviewModal"
+      :preview-url="previewUrl"
+      :name="profile.name"
+      :loading="uploading"
+      @confirm="confirmReplace"
+      @cancel="cancelReplace"
+    />
+
     <UPageCard
       title="Profile"
       description="These informations will be displayed publicly."
@@ -75,7 +180,6 @@ function onFileClick() {
         name="name"
         label="Name"
         description="Will appear on receipts, invoices, and other communication."
-        required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
         <UInput
@@ -95,6 +199,7 @@ function onFileClick() {
           v-model="profile.email"
           type="email"
           autocomplete="off"
+          disabled
         />
       </UFormField>
       <USeparator />
@@ -133,7 +238,7 @@ function onFileClick() {
             ref="fileRef"
             type="file"
             class="hidden"
-            accept=".jpg, .jpeg, .png, .gif"
+            accept=".jpg, .jpeg, .png, .gif, .webp"
             @change="onFileChange"
           />
         </div>

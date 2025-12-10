@@ -22,5 +22,8 @@ export default eventHandler(async (event) => {
     id: userProfile.id,
     email: userProfile.email,
     name: userProfile.name,
+    username: userProfile.username,
+    bio: userProfile.bio,
+    avatarUrl: userProfile.avatarUrl,
   };
 });

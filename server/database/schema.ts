@@ -9,9 +9,13 @@ import {
 
 export const usersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  name: text("name"),
   email: text("email").notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
+
+  username: varchar("username", { length: 100 }).notNull().unique(),
+  bio: text("bio"),
+  avatarUrl: text("avatar_url"),
 });
 
 export const postsTable = pgTable("posts_table", {

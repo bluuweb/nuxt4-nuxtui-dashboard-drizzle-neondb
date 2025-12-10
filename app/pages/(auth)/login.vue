@@ -51,7 +51,7 @@ async function onSubmit(payload: FormSubmitEvent<LoginTypeZodSchema>) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center gap-4 p-4">
+  <div class="flex flex-col items-center justify-center gap-4 p-4 h-screen">
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         :schema="loginZodSchema"
@@ -60,7 +60,16 @@ async function onSubmit(payload: FormSubmitEvent<LoginTypeZodSchema>) {
         icon="i-lucide-user"
         :fields="fields"
         @submit="onSubmit"
-      />
+      >
+        <template #description>
+          Don't have an account?
+          <ULink
+            to="/register"
+            class="text-primary font-medium"
+            >Sign up</ULink
+          >.
+        </template>
+      </UAuthForm>
     </UPageCard>
   </div>
 </template>
