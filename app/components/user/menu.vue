@@ -16,7 +16,7 @@ const { data: userDB } = await useFetch("/api/user/profile", {
 const user = computed(() => ({
   name: userDB.value?.username || "",
   avatar: {
-    src: userDB.value?.avatarUrl || "",
+    src: userDB.value?.avatarUrl || "/uploads/avatars/sin-avatar.jpg",
     alt: userDB.value?.name || "",
   },
 }));

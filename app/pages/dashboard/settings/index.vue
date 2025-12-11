@@ -17,7 +17,7 @@ const profile = reactive<Partial<ProfileSchema>>({
   name: user.value?.name || "",
   email: user.value?.email || "",
   username: user.value?.username || "",
-  avatar: user.value?.avatarUrl || "",
+  avatar: user.value?.avatarUrl || "/uploads/avatars/sin-avatar.jpg",
   bio: user.value?.bio || "",
 });
 const toast = useToast();

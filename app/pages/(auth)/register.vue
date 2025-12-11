@@ -18,6 +18,14 @@ const fields: AuthFormField[] = [
     defaultValue: "test1@test.com",
   },
   {
+    name: "username",
+    label: "Username",
+    type: "text",
+    placeholder: "Enter your username",
+    required: true,
+    defaultValue: "testuser1",
+  },
+  {
     name: "password",
     label: "Password",
     type: "password",
@@ -25,12 +33,11 @@ const fields: AuthFormField[] = [
     required: true,
   },
   {
-    name: "username",
-    label: "Username",
-    type: "text",
-    placeholder: "Enter your username",
+    name: "confirmPassword",
+    label: "Confirm Password",
+    type: "password",
+    placeholder: "Confirm your password",
     required: true,
-    defaultValue: "testuser1",
   },
 ];
 
