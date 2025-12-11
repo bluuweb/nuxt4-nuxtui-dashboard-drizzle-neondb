@@ -6,7 +6,7 @@ import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui";
 
 const toast = useToast();
 
-const { fetch } = useUserSession();
+const { fetch: refreshSession } = useUserSession();
 
 const fields: AuthFormField[] = [
   {
@@ -32,6 +32,7 @@ async function onSubmit(payload: FormSubmitEvent<LoginTypeZodSchema>) {
       method: "POST",
       body: payload.data,
     });
+    await refreshSession();
     await navigateTo("/dashboard");
     toast.add({
       title: "Login Successful",
