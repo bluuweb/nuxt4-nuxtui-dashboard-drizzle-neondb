@@ -10,8 +10,12 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^2.0.21",
+    "@ai-sdk/vue": "^2.0.113",
     "@neondatabase/serverless": "^1.0.2",
     "@nuxt/ui": "^4.2.1",
+    "@nuxtjs/mdc": "^0.19.1",
+    "ai": "^5.0.113",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
     "file-type": "^21.1.1",

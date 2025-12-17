@@ -1,7 +1,7 @@
 // auth.d.ts
 declare module "#auth-utils" {
   interface User {
-    id: number;
+    id: string;
     email: string;
     name: string;
   }
@@ -15,4 +15,5 @@ declare module "#auth-utils" {
   }
 }
 
-export {};
+export { };
+

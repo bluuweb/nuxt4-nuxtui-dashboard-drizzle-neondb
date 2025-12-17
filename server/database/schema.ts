@@ -1,14 +1,15 @@
 import {
-  integer,
+  json,
+  pgEnum,
   pgTable,
-  serial,
   text,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users_table", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: text("name"),
   email: text("email").notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
@@ -18,21 +19,38 @@ export const usersTable = pgTable("users_table", {
   avatarUrl: text("avatar_url"),
 });
 
-export const postsTable = pgTable("posts_table", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  userId: integer("user_id")
+export const chatsTable = pgTable("chats", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
+  title: varchar("title", { length: 200 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const messageRoleEnum = pgEnum("message_role", [
+  "user",
+  "assistant",
+  "system",
+]);
+
+export const messagesTable = pgTable("messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatId: uuid("chat_id")
     .notNull()
-    .$onUpdate(() => new Date()),
+    .references(() => chatsTable.id, { onDelete: "cascade" }),
+
+  role: messageRoleEnum().notNull(),
+
+  parts: json(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;
 
-export type InsertPost = typeof postsTable.$inferInsert;
-export type SelectPost = typeof postsTable.$inferSelect;
+export type InsertChat = typeof chatsTable.$inferInsert;
+export type SelectChat = typeof chatsTable.$inferSelect;
+
+export type InsertMessage = typeof messagesTable.$inferInsert;
+export type SelectMessage = typeof messagesTable.$inferSelect;
