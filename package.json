@@ -28,6 +28,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@iconify-json/simple-icons": "^1.2.63",
     "drizzle-kit": "^0.31.7"
   }
 }
